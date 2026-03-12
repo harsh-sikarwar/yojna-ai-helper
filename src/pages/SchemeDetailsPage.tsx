@@ -1,88 +1,120 @@
 import { motion } from "framer-motion";
-import { ArrowLeft, CheckCircle2, FileText, ArrowRight } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ExternalLink, Users, Calendar, Building2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const schemeData: Record<string, any> = {
-  "pm-kisan": {
-    name: "PM Kisan Samman Nidhi",
-    nameHi: "पीएम किसान सम्मान निधि",
-    icon: "🌾",
-    overview: "Financial assistance of ₹6,000 per year to small and marginal farmers in three equal installments.",
-    overviewHi: "छोटे और सीमांत किसानों को तीन समान किस्तों में ₹6,000 प्रति वर्ष की वित्तीय सहायता।",
-    eligibility: ["Farmer with land", "Indian citizen", "Income below ₹2 Lakh"],
-    eligibilityHi: ["भूमि वाला किसान", "भारतीय नागरिक", "आय ₹2 लाख से कम"],
-    documents: [
-      { name: "Aadhaar Card", nameHi: "आधार कार्ड", icon: "🪪" },
-      { name: "Bank Passbook", nameHi: "बैंक पासबुक", icon: "🏦" },
-      { name: "Land Record", nameHi: "भूमि रिकॉर्ड", icon: "📄" },
-    ],
-    steps: ["Register on portal", "Verify Aadhaar", "Submit land details", "Receive benefit"],
-    stepsHi: ["पोर्टल पर पंजीकरण करें", "आधार सत्यापित करें", "भूमि विवरण जमा करें", "लाभ प्राप्त करें"],
-    benefit: "₹6,000 per year",
-    benefitHi: "₹6,000 प्रति वर्ष",
-  },
-};
-
-const defaultScheme = schemeData["pm-kisan"];
+import { getSchemeById } from "@/data/schemes";
 
 const SchemeDetailsPage = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language, t } = useLanguage();
-  const scheme = schemeData[id || ""] || defaultScheme;
+
+  const scheme = getSchemeById(id ?? "");
   const isHi = language === "hi";
 
+  if (!scheme) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
+        <span className="text-6xl">😕</span>
+        <p className="text-lg font-bold text-foreground">Scheme not found</p>
+        <button onClick={() => navigate("/schemes")} className="text-sm font-semibold text-primary">
+          ← Back to Schemes
+        </button>
+      </div>
+    );
+  }
+
+  const handleApply = () => window.open(scheme.applyUrl, "_blank", "noopener,noreferrer");
+
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="gradient-hero px-5 pb-6 pt-6">
-        <div className="mx-auto flex max-w-lg items-center gap-3">
-          <button onClick={() => navigate(-1)} className="rounded-xl bg-primary-foreground/10 p-2">
-            <ArrowLeft className="h-5 w-5 text-primary-foreground" />
+    <div className="min-h-screen bg-background pb-28">
+
+      {/* ── Gradient Hero ── */}
+      <div className={`relative overflow-hidden bg-gradient-to-br ${scheme.colorGradient} px-5 pb-8 pt-6`}>
+        <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+        <div className="absolute -bottom-8 left-4 h-28 w-28 rounded-full bg-black/10 blur-xl" />
+
+        <div className="relative mx-auto max-w-2xl">
+          <button
+            onClick={() => navigate(-1)}
+            className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm"
+          >
+            <ArrowLeft className="h-5 w-5" />
           </button>
-          <div className="flex-1">
-            <span className="text-3xl">{scheme.icon}</span>
-            <h1 className="mt-1 text-lg font-bold text-primary-foreground">
-              {isHi ? scheme.nameHi : scheme.name}
-            </h1>
+
+          <div className="flex items-start gap-4">
+            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-3xl bg-white/20 backdrop-blur-sm shadow-lg">
+              <span className="text-4xl leading-none">{scheme.icon}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="mb-1 inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                {scheme.category}
+              </span>
+              <h1 className="text-xl font-extrabold leading-tight text-white">
+                {isHi ? scheme.nameHi : scheme.name}
+              </h1>
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            {[
+              { icon: Users,     text: scheme.beneficiaries },
+              { icon: Calendar,  text: `Since ${scheme.launchedYear}` },
+              { icon: Building2, text: scheme.ministry.split(" ").slice(0, 3).join(" ") },
+            ].map((m) => (
+              <div key={m.text} className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 backdrop-blur-sm">
+                <m.icon className="h-3.5 w-3.5 text-white/80" />
+                <span className="text-xs font-medium text-white/90">{m.text}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-lg space-y-6 px-5 pt-6">
-        {/* Benefit banner */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-success/10 p-4 text-center">
-          <p className="text-sm text-muted-foreground">{t("benefit")}</p>
-          <p className="text-2xl font-extrabold text-success">{isHi ? scheme.benefitHi : scheme.benefit}</p>
+      {/* ── Body ── */}
+      <div className="mx-auto max-w-2xl space-y-6 px-5 pt-6">
+
+        {/* Benefit card */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`overflow-hidden rounded-2xl bg-gradient-to-br ${scheme.colorGradient} p-5 text-center shadow-lg`}
+        >
+          <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-white/70">{t("benefit")}</p>
+          <p className="text-2xl font-extrabold text-white">{isHi ? scheme.benefitHi : scheme.benefit}</p>
         </motion.div>
 
         {/* Overview */}
         <section>
           <h2 className="mb-2 text-base font-bold text-foreground">{t("overview")}</h2>
-          <p className="text-sm leading-relaxed text-muted-foreground">{isHi ? scheme.overviewHi : scheme.overview}</p>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {isHi ? scheme.overviewHi : scheme.overview}
+          </p>
         </section>
 
         {/* Eligibility */}
         <section>
           <h2 className="mb-3 text-base font-bold text-foreground">{t("eligibility")}</h2>
           <div className="space-y-2">
-            {(isHi ? scheme.eligibilityHi : scheme.eligibility).map((item: string, i: number) => (
-              <div key={i} className="flex items-center gap-3 rounded-xl bg-card p-3 shadow-card">
-                <CheckCircle2 className="h-5 w-5 text-success" />
+            {(isHi ? scheme.eligibilityHi : scheme.eligibility).map((item, i) => (
+              <div key={i} className="flex items-start gap-3 rounded-xl bg-card p-3 shadow-card">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-success" />
                 <span className="text-sm font-medium text-foreground">{item}</span>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Required Documents */}
+        {/* Documents */}
         <section>
           <h2 className="mb-3 text-base font-bold text-foreground">{t("requiredDocs")}</h2>
           <div className="space-y-2">
-            {scheme.documents.map((doc: any, i: number) => (
+            {scheme.documents.map((doc, i) => (
               <div key={i} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card">
-                <span className="text-2xl">{doc.icon}</span>
-                <span className="text-sm font-medium text-foreground">{isHi ? doc.nameHi : doc.name}</span>
+                <span className="text-2xl leading-none">{doc.icon}</span>
+                <span className="text-sm font-medium text-foreground">
+                  {isHi ? doc.nameHi : doc.name}
+                </span>
               </div>
             ))}
           </div>
@@ -92,25 +124,29 @@ const SchemeDetailsPage = () => {
         <section>
           <h2 className="mb-3 text-base font-bold text-foreground">{t("howToApply")}</h2>
           <div className="space-y-3">
-            {(isHi ? scheme.stepsHi : scheme.steps).map((step: string, i: number) => (
+            {(isHi ? scheme.stepsHi : scheme.steps).map((step, i) => (
               <div key={i} className="flex items-start gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${scheme.colorGradient} text-xs font-bold text-white shadow-sm`}>
                   {i + 1}
                 </div>
-                <p className="pt-0.5 text-sm text-foreground">{step}</p>
+                <p className="pt-0.5 text-sm leading-relaxed text-foreground">{step}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Apply Button */}
+        {/* Apply CTA */}
         <motion.button
           whileTap={{ scale: 0.97 }}
-          onClick={() => navigate("/apply")}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-base font-bold text-primary-foreground shadow-lg shadow-primary/20"
+          onClick={handleApply}
+          className={`flex w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r ${scheme.colorGradient} py-4 text-base font-bold text-white shadow-xl transition-transform active:scale-[0.98]`}
         >
-          {t("applyNow")} <ArrowRight className="h-5 w-5" />
+          {t("applyNow")} — Official Portal
+          <ExternalLink className="h-5 w-5" />
         </motion.button>
+        <p className="pb-4 text-center text-xs text-muted-foreground">
+          You'll be redirected to the official government portal
+        </p>
       </div>
     </div>
   );

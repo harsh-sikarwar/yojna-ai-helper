@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, User, FileText, FolderOpen } from "lucide-react";
+import { Home, User, FileText, Calculator } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const BottomNav = () => {
@@ -9,9 +9,9 @@ const BottomNav = () => {
 
   const items = [
     { path: "/", icon: Home, label: t("home") },
-    { path: "/profile", icon: User, label: t("profile") },
+    { path: "/calculator", icon: Calculator, label: "Calculator" },
     { path: "/schemes", icon: FileText, label: t("schemes") },
-    { path: "/documents", icon: FolderOpen, label: t("documents") },
+    { path: "/profile", icon: User, label: t("profile") },
   ];
 
   return (

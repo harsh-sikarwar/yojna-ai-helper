@@ -11,7 +11,8 @@ import ProfilePage from "./pages/ProfilePage";
 import SchemesPage from "./pages/SchemesPage";
 import SchemeDetailsPage from "./pages/SchemeDetailsPage";
 import DocumentsPage from "./pages/DocumentsPage";
-import ApplicationPage from "./pages/ApplicationPage";
+import VoicePage from "./pages/VoicePage";
+import EligibilityCalculatorPage from "./pages/EligibilityCalculatorPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,7 +30,8 @@ const App = () => (
             <Route path="/schemes" element={<SchemesPage />} />
             <Route path="/scheme/:id" element={<SchemeDetailsPage />} />
             <Route path="/documents" element={<DocumentsPage />} />
-            <Route path="/apply" element={<ApplicationPage />} />
+            <Route path="/voice" element={<VoicePage />} />
+            <Route path="/calculator" element={<EligibilityCalculatorPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <AIChatWidget />
